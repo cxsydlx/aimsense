@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  AimSense MSI（WiX v5）。
+  设计取舍：
+   * 按用户安装（Scope="perUser"，装到 %LocalAppData%\Programs\AimSense）：
+     不需要管理员权限、不弹 UAC，也与本应用把数据写在 %LocalAppData%\AimSense 的模型一致。
+   * 自包含发布（self-contained）：用户机器不需要预装 .NET 运行时。
+   * MajorUpgrade + AllowSameVersionUpgrades：升级时先卸旧版；同版本重装也能自动替换
+     （WiX 每次构建会生成新的 ProductCode，不加这一项会同版本并存）。
+   * 快捷方式放在开始菜单；桌面快捷方式由用户在安装界面勾选（可选功能）。
+
+  构建（三个坑，详见 README §8）：
+     $env:TEMP = "$root\_tmp"; $env:TMP = "$root\_tmp"
+     & "$root\.nuget\packages\wixtoolset.sdk\5.0.2\tools\net472\x64\wix.exe" build .\AimSense.wxs `
+         -arch x64 -o ..\..\_deliver\AimSense-1.1.2-x64.msi -d "PublishDir=$root\_publish\AimSense"
+   ※ 必须显式用 x64 版 wix.exe；临时目录必须在工作区内；先 dotnet publish 生成新负载。
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="AimSense 人物瞄准实验室"
+           Manufacturer="AimSense"
+           Version="1.1.2"
+           UpgradeCode="8C1F5D42-7A3B-4E19-9C6D-2B5E7A0F4D31"
+           Scope="perUser"
+           Language="2052"
+           Codepage="65001">
+    <SummaryInformation Description="AimSense 人物瞄准实验室 —— 灵敏度校准工具" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="已安装更高版本的 AimSense，请先卸载。" />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="ProgramsFolder" Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="AimSense" />
+      </Directory>
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppMenuFolder" Name="AimSense" />
+    </StandardDirectory>
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Icon Id="AppIcon.exe" SourceFile="$(var.PublishDir)\AimSense.exe" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.exe" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+
+    <Feature Id="Main" Title="AimSense 主程序" Level="1" AllowAbsent="no">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+    <Feature Id="Desktop" Title="创建桌面快捷方式" Level="1">
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" />
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <Component Id="StartMenuShortcut" Directory="AppMenuFolder" Guid="3D6A9E14-52C7-4B08-A1F2-6E9C4B7D5A20">
+      <Shortcut Id="StartMenuLink" Name="AimSense 人物瞄准实验室" Description="灵敏度校准与瞄准训练辅助"
+                Target="[INSTALLFOLDER]AimSense.exe" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon.exe" />
+      <RemoveFolder Id="RemoveAppMenuFolder" On="uninstall" />
+      <RegistryValue Root="HKCU" Key="Software\AimSense" Name="StartMenu" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="A7E4B1C8-9F52-4D3E-8B71-C0D5A2E6F493">
+      <Shortcut Id="DesktopLink" Name="AimSense" Description="灵敏度校准与瞄准训练辅助"
+                Target="[INSTALLFOLDER]AimSense.exe" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon.exe" />
+      <RegistryValue Root="HKCU" Key="Software\AimSense" Name="Desktop" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+  </Fragment>
+</Wix>

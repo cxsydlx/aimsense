@@ -1,0 +1,34 @@
+<Window x:Class="AimSense.TraceImportWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="AimSense · JSONL 解析" Width="1100" Height="780" MinWidth="760" MinHeight="560" WindowStartupLocation="CenterOwner"
+ Background="#F3F3F3" Foreground="{StaticResource TextPrimary}" FontFamily="Segoe UI Variable Text,Segoe UI,Microsoft YaHei UI" FontSize="14"
+ TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True" SnapsToDevicePixels="True">
+ <Grid Margin="28,22,28,20"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="180"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+  <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+   <StackPanel><TextBlock Text="JSONL 记录解析" Style="{StaticResource DisplayText}"/><TextBlock Text="重算成绩 · 查看18块明细 · 从记录继续" Style="{StaticResource Caption}" Margin="0,4,0,0"/></StackPanel>
+   <WrapPanel Grid.Column="1" MaxWidth="520" VerticalAlignment="Center">
+    <Button x:Name="OpenButton" Content="选择 JSONL 文件" Style="{StaticResource AccentButton}" Click="OpenClicked" Margin="0,4,8,4"/>
+    <Button x:Name="ResumeButton" Content="继续未完成测试" IsEnabled="False" Click="ResumeClicked" Margin="0,4,8,4"/>
+    <Button x:Name="SaveButton" Content="导出解析报告" IsEnabled="False" Click="SaveClicked"/>
+    <Button x:Name="RestartReviewButton" Content="按主界面显示设置重做18块复核" Visibility="Collapsed" Click="RestartReviewClicked"/>
+   </WrapPanel>
+  </Grid>
+  <TextBlock x:Name="StatusText" Grid.Row="1" Text="选择本机或收到的 JSONL 文件。未完成的综合复核会说明还缺哪些计分块。" Style="{StaticResource Caption}" Margin="0,14,0,14"/>
+  <DataGrid x:Name="CandidatesGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" HeadersVisibility="Column"
+            Background="White" BorderBrush="{StaticResource CardStrokeStrong}" BorderThickness="1" RowBackground="White" AlternatingRowBackground="#F7F9FC"
+            GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{StaticResource Divider}">
+   <DataGrid.Columns><DataGridTextColumn Header="项目" Binding="{Binding Mode}" Width="120"/><DataGridTextColumn Header="cm/360" Binding="{Binding Cm360,StringFormat=F2}" Width="100"/><DataGridTextColumn Header="游戏灵敏度" Binding="{Binding Sensitivity,StringFormat=F4}" Width="120"/><DataGridTextColumn Header="eDPI" Binding="{Binding EDpi,StringFormat=F1}" Width="100"/><DataGridTextColumn Header="此档有效块" Binding="{Binding ValidBlocks}" Width="100"/><DataGridTextColumn Header="结论状态" Binding="{Binding Status}" Width="*"/></DataGrid.Columns>
+  </DataGrid>
+  <TabControl Grid.Row="3" Margin="0,16,0,0">
+   <TabItem Header="18块综合复核明细" IsSelected="True"><Grid Margin="0,4,0,0"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+    <TextBlock Text="三项测试 × 三个灵敏度档位 × 每档两遍 = 18块（每项6块）" Style="{StaticResource BodyStrong}"/>
+    <TextBlock x:Name="ReviewSummaryText" Grid.Row="1" Margin="0,10,0,12" TextWrapping="Wrap" Foreground="{StaticResource AccentBrush}"/>
+    <DataGrid x:Name="ReviewGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" HeadersVisibility="Column"
+              Background="White" BorderBrush="{StaticResource CardStrokeStrong}" BorderThickness="1" RowBackground="White" AlternatingRowBackground="#F7F9FC"
+              GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{StaticResource Divider}">
+     <DataGrid.Columns><DataGridTextColumn Header="测试项目" Binding="{Binding Mode}" Width="85"/><DataGridTextColumn Header="档位" Binding="{Binding Gear}" Width="45"/><DataGridTextColumn Header="cm/360" Binding="{Binding Cm360,StringFormat=F2}" Width="80"/><DataGridTextColumn Header="灵敏度" Binding="{Binding Sensitivity,StringFormat=F4}" Width="85"/><DataGridTextColumn Header="eDPI" Binding="{Binding EDpi,StringFormat=F1}" Width="85"/><DataGridTextColumn Header="第1遍 · 新脚本1" Binding="{Binding FirstPass}" Width="*"/><DataGridTextColumn Header="第2遍 · 新脚本2" Binding="{Binding SecondPass}" Width="*"/><DataGridTextColumn Header="证据" Binding="{Binding Progress}" Width="85"/></DataGrid.Columns>
+    </DataGrid>
+   </Grid></TabItem>
+   <TabItem Header="评分原因与完整报告"><TextBox x:Name="ReportText" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Padding="14" BorderThickness="0" Background="Transparent" FontSize="13"/></TabItem>
+  </TabControl>
+ </Grid>
+</Window>
